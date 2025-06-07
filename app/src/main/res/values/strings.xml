@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">EcoLens</string>
+    <!-- General -->
+
+    <string name="greeting">¡Hola!</string>
+
+    <!-- Start Screen -->
+
+    <string name="welcome">Bienvenido</string>
+    <string name="loginButton">INICIAR SESIÓN</string>
+    <string name="createAccountButton">CREAR CUENTA</string>
+
+    <!-- Login Screen -->
+
+    <string name="loginInstrucction">Inicia sesión con tu cuenta</string>
+    <string name="loginNoAcc">¿No tienes una cuenta?</string>
+    <string name="txtUsername">Nombre de usuario o Email:</string>
+    <string name="usernamePlaceholder">username | user@example.com</string>
+    <string name="txtPassword">Contraseña:</string>
+
+    <!-- Register Screen -->
+    <string name="registerMsg">Crea una nueva cuenta</string>
+    <string name="txtUserName">Nombre de usuario:</string>
+    <string name="txtEmail">Email:</string>
+    <string name="gender">Género:</string>
+    <string name="genderM">Masculino</string>
+    <string name="genderF">Femenino</string>
+    <string name="nationality">Nacionalidad:</string>
+    <string name="txtConfPassword">Confirmar contraseña:</string>
+    <string name="userPlaceholder">usuario</string>
+    <string name="emailPlaceholder">username@example.com</string>
+    <string name="existAcc">¿Ya estás registrado?</string>
+
+    <!-- Profile Screen -->
+    <string name="profileScreenTitle">Perfil de usuario</string>
+</resources>
