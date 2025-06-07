@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.ecolens.data.local.session.SessionViewModel
 import com.example.ecolens.ui.screens.StartScreen
 import com.example.ecolens.ui.screens.LoginScreen
 import com.example.ecolens.ui.screens.RegisterScreen
@@ -15,12 +16,15 @@ import com.example.ecolens.ui.screens.ScanScreen
 import com.example.ecolens.ui.screens.HistoryScreen
 import com.example.ecolens.ui.screens.ProfileScreen
 import com.example.ecolens.ui.screens.LaunchScreen
+import com.example.ecolens.ui.viewmodels.RegisterViewModel
 
 
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "launch"
+    startDestination: String = "launch",
+    sessionViewModel: SessionViewModel,
+    registerViewModel: RegisterViewModel
 ) {
     NavHost(
         navController = navController,
@@ -34,7 +38,7 @@ fun AppNavHost(
             LoginScreen(navController)
         }
         composable("Register") {
-            RegisterScreen(navController)
+            RegisterScreen(navController, registerViewModel)
         }
 
         //Pantallas privadas
@@ -55,7 +59,7 @@ fun AppNavHost(
             HistoryScreen()
         }
         composable("profile") {
-            ProfileScreen(navController)
+            ProfileScreen(navController, sessionViewModel)
         }
         composable("launch") {
             LaunchScreen(navController)

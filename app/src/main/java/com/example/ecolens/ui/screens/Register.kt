@@ -4,6 +4,7 @@
 
 package com.example.ecolens.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -49,6 +50,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -70,27 +74,54 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.ecolens.R
+import com.example.ecolens.data.local.session.SessionViewModel
+import com.example.ecolens.ui.viewmodels.RegisterViewModel
 
 /**
  * Función composable para construir la pantalla de registro de nuevos usuarios.
  */
 @Composable
-fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifier) {
+fun RegisterScreen(navController: NavHostController, registerViewModel: RegisterViewModel, modifier: Modifier = Modifier) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    val genderOptions = listOf(
-        stringResource(id = R.string.genderM),
-        stringResource(id = R.string.genderF)
-    )
     var selectedGender by remember { mutableStateOf("") }
+    var selectedCountry by remember { mutableStateOf("") }
+
+    val registerSuccess by registerViewModel.registerSuccess.collectAsState()
+    val errorMessage by registerViewModel.errorMessage.collectAsState()
+
+    val isFormValid = username.isNotBlank() &&
+            email.isNotBlank() &&
+            selectedCountry.isNotBlank() &&
+            selectedGender.isNotBlank() &&
+            password.isNotBlank() &&
+            confirmPassword.isNotBlank() &&
+            password == confirmPassword
+
+    val context = LocalContext.current
+
+    LaunchedEffect(registerSuccess) {
+        if (registerSuccess == true) {
+            Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()
+            navController.navigate("Login")
+        }
+    }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            if (it.isNotEmpty()) {
+                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.horizontalGradient(
+                Brush.linearGradient(
                     listOf(
                         Color(0xFF409D44),
                         Color(0xFF037A6F),
@@ -117,9 +148,10 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
                         Icons.Default.ArrowBack,
                         contentDescription = "Volver",
                         tint = Color.White,
-                        modifier = Modifier.size(38.dp))
+                        modifier = Modifier.size(38.dp)
+                    )
                 }
-                IconButton(onClick = { }) {
+                IconButton(onClick = { /* Más opciones */ }) {
                     Icon(
                         Icons.Default.MoreVert,
                         contentDescription = "Opciones",
@@ -131,10 +163,12 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
 
             Text(
                 text = stringResource(id = R.string.registerMsg),
-                fontSize = 36.sp,
+                fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                modifier = Modifier.padding(vertical = 24.dp)
+                modifier = Modifier
+                    .padding(vertical = 24.dp)
+                    .align(Alignment.CenterHorizontally)
             )
 
             Column(
@@ -145,13 +179,17 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val fieldModifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
                     label = { Text(stringResource(id = R.string.txtUserName)) },
                     leadingIcon = { Icon(Icons.Default.AccountCircle, contentDescription = null) },
                     singleLine = true,
-                    modifier = Modifier.width(280.dp)
+                    modifier = fieldModifier
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -163,22 +201,28 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.width(280.dp)
+                    modifier = fieldModifier
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                CountryDropdownMenu()
+                CountryDropdownMenu(
+                    selectedCountry = selectedCountry,
+                    onCountrySelected = { selectedCountry = it }
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Column(modifier = Modifier.width(280.dp)) {
+                Column(modifier = fieldModifier) {
                     Text(
                         text = stringResource(id = R.string.gender),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    genderOptions.forEach { gender ->
+                    listOf(
+                        stringResource(id = R.string.genderM),
+                        stringResource(id = R.string.genderF)
+                    ).forEach { gender ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             RadioButton(
                                 selected = selectedGender == gender,
@@ -198,7 +242,7 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.width(280.dp)
+                    modifier = fieldModifier
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -210,20 +254,30 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
                     leadingIcon = { Icon(Icons.Default.CheckCircle, contentDescription = null) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.width(280.dp)
+                    modifier = fieldModifier
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = { /* Crear cuenta */ },
+                    onClick = {
+                        registerViewModel.registerUser(
+                            username,
+                            email,
+                            selectedCountry,
+                            selectedGender,
+                            password,
+                            confirmPassword
+                        )
+                    },
                     modifier = Modifier
-                        .height(56.dp)
-                        .width(280.dp),
+                        .fillMaxWidth()
+                        .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF026B60),
                         contentColor = Color.White
-                    )
+                    ),
+                    enabled = isFormValid
                 ) {
                     Text(
                         text = stringResource(id = R.string.createAccountButton),
@@ -255,21 +309,24 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryDropdownMenu() {
+fun CountryDropdownMenu(
+    selectedCountry: String,
+    onCountrySelected: (String) -> Unit
+) {
     val countries = listOf(
         "El Salvador",
         "Guatemala",
         "Honduras",
         "Nicaragua",
         "Costa Rica",
-        "Panamá")
+        "Panamá"
+    )
     var expanded by remember { mutableStateOf(false) }
-    var selectedCountry by remember { mutableStateOf("") }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.width(280.dp)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
     ) {
         TextField(
             readOnly = true,
@@ -279,7 +336,9 @@ fun CountryDropdownMenu() {
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
-            modifier = Modifier.menuAnchor().background(color = Color.Transparent)
+            modifier = Modifier
+                .menuAnchor()
+                .background(color = Color.Transparent)
         )
 
         ExposedDropdownMenu(
@@ -290,7 +349,7 @@ fun CountryDropdownMenu() {
                 DropdownMenuItem(
                     text = { Text(selectionOption) },
                     onClick = {
-                        selectedCountry = selectionOption
+                        onCountrySelected(selectionOption)
                         expanded = false
                     }
                 )
@@ -300,9 +359,9 @@ fun CountryDropdownMenu() {
 }
 
 
+
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun RegisterPreview() {
-    val navController = rememberNavController()
-    RegisterScreen(navController)
+
 }

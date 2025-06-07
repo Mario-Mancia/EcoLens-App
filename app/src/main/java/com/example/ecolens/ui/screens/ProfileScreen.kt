@@ -42,14 +42,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.ecolens.R
 import com.example.ecolens.data.local.session.SessionManager
+import com.example.ecolens.data.local.session.SessionViewModel
 import kotlinx.coroutines.launch
 
 //Función Composable para estructurar la pantalla de perfil de ususario
 @Composable
-fun ProfileScreen(navController: NavHostController, modifier: Modifier = Modifier) {
+fun ProfileScreen(navController: NavHostController, sessionViewModel: SessionViewModel , modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val sessionManager = remember { SessionManager(context) }
     val coroutineScope = rememberCoroutineScope()
+    val userEmail = sessionViewModel.userEmail.value
     val navbarColor = Brush.horizontalGradient(
         listOf(
             Color(0xFF409D44),
@@ -110,6 +112,9 @@ fun ProfileScreen(navController: NavHostController, modifier: Modifier = Modifie
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Text(
+                text = ("Bienvenido, $userEmail")
+            )
             Button(
                 onClick = {
                     coroutineScope.launch {
@@ -145,5 +150,6 @@ fun ProfileScreen(navController: NavHostController, modifier: Modifier = Modifie
 @Composable
 fun ProfilePreview() {
     val navController = rememberNavController()
-    ProfileScreen(navController)
+
+    //ProfileScreen(navController)
 }
