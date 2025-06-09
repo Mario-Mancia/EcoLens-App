@@ -8,16 +8,16 @@
 
 package com.example.ecolens
 
+import android.app.Activity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -34,17 +34,21 @@ import com.example.ecolens.data.local.session.SessionViewModel
 import com.example.ecolens.data.local.session.SessionViewModelFactory
 import com.example.ecolens.ui.theme.EcoLensTheme
 import com.example.ecolens.navigation.AppNavHost
-import com.example.ecolens.ui.screens.StartScreen
-import com.example.ecolens.ui.screens.LoginScreen
-import com.example.ecolens.ui.screens.RegisterScreen
 import com.example.ecolens.ui.components.BottomNavBar
 import com.example.ecolens.ui.components.TopNavBar
 import com.example.ecolens.ui.viewmodels.RegisterViewModel
 import com.example.ecolens.ui.viewmodels.RegisterViewModelFactory
+import com.example.ecolens.ui.viewmodels.UserStatsViewModel
+import com.example.ecolens.ui.viewmodels.UserStatsViewModelFactory
+import com.example.ecolens.ui.viewmodels.UserViewModel
+import com.example.ecolens.ui.viewmodels.UserViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.example.ecolens.hardware.vibration.*
 
 class MainActivity : ComponentActivity() {
     private lateinit var sessionViewModel: SessionViewModel
@@ -83,13 +87,37 @@ fun MainScreen(sessionViewModel: SessionViewModel) {
     val bottomBarRoutes = listOf("home", "pedometer", "camera", "qrscanner", "history")
     val showBottomBar = currentRoute in bottomBarRoutes
     val showTopBar = currentRoute in bottomBarRoutes
-
     val context = LocalContext.current
+
+    if (currentRoute in bottomBarRoutes) {
+        val activity = context as? Activity
+        var backPressedTime by remember { mutableStateOf(0L) }
+
+        BackHandler {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - backPressedTime < 2000) {
+                activity?.finish()
+            } else {
+                backPressedTime = currentTime
+                shortVibrate(context)
+                Toast.makeText(context, "Presiona de nuevo para salir", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
     val db = remember { DatabaseInstance.getDatabase(context) }
     val userDao = remember { db.userDao() }
+    val userStatsDao = remember { db.userStatsDao() }
 
     val registerViewModel: RegisterViewModel = viewModel(
         factory = RegisterViewModelFactory(userDao)
+    )
+    val userViewModel: UserViewModel = viewModel(
+        factory = UserViewModelFactory(userDao)
+    )
+    val userStatsViewModel: UserStatsViewModel = viewModel(
+        factory = UserStatsViewModelFactory(userStatsDao)
     )
 
     Scaffold(
@@ -111,7 +139,9 @@ fun MainScreen(sessionViewModel: SessionViewModel) {
                 navController = navController,
                 startDestination = "launch",
                 sessionViewModel,
-                registerViewModel
+                registerViewModel,
+                userViewModel,
+                userStatsViewModel
             )
         }
     }

@@ -17,6 +17,8 @@ import com.example.ecolens.ui.screens.HistoryScreen
 import com.example.ecolens.ui.screens.ProfileScreen
 import com.example.ecolens.ui.screens.LaunchScreen
 import com.example.ecolens.ui.viewmodels.RegisterViewModel
+import com.example.ecolens.ui.viewmodels.UserStatsViewModel
+import com.example.ecolens.ui.viewmodels.UserViewModel
 
 
 @Composable
@@ -24,7 +26,9 @@ fun AppNavHost(
     navController: NavHostController = rememberNavController(),
     startDestination: String = "launch",
     sessionViewModel: SessionViewModel,
-    registerViewModel: RegisterViewModel
+    registerViewModel: RegisterViewModel,
+    userViewModel: UserViewModel,
+    userStatsViewModel: UserStatsViewModel
 ) {
     NavHost(
         navController = navController,
@@ -35,7 +39,7 @@ fun AppNavHost(
             StartScreen(navController)
         }
         composable("Login") {
-            LoginScreen(navController)
+            LoginScreen(navController, sessionViewModel)
         }
         composable("Register") {
             RegisterScreen(navController, registerViewModel)
@@ -44,22 +48,22 @@ fun AppNavHost(
         //Pantallas privadas
 
         composable("home") {
-            HomeScreen()
+            HomeScreen(sessionViewModel, userViewModel, userStatsViewModel)
         }
         composable("pedometer") {
-            PedometerScreen()
+            PedometerScreen(sessionViewModel, userViewModel)
         }
         composable("camera") {
-            CamScreen()
+            CamScreen(sessionViewModel, userViewModel)
         }
         composable("qrscanner") {
-            ScanScreen()
+            ScanScreen(sessionViewModel, userViewModel)
         }
         composable("history") {
-            HistoryScreen()
+            HistoryScreen(sessionViewModel, userViewModel)
         }
         composable("profile") {
-            ProfileScreen(navController, sessionViewModel)
+            ProfileScreen(navController, sessionViewModel, userViewModel)
         }
         composable("launch") {
             LaunchScreen(navController)
