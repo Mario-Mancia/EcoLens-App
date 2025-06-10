@@ -71,14 +71,14 @@ fun HomeScreen(sessionViewModel: SessionViewModel,
             style = TextStyle(
                 fontWeight = FontWeight.Bold,
                 fontSize = 32.sp,
-                color = MaterialTheme.colorScheme.primary
+                color = Color(0xFF026B60)
             ),
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
         Text(
             text = "Aquí podrás ver un resumen de tus estadísticas con EcoLens:",
-            style = TextStyle(fontSize = 18.sp),
+            style = TextStyle(fontSize = 18.sp, color = Color.DarkGray),
             modifier = Modifier.padding(bottom = 24.dp)
         )
 

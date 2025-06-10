@@ -32,17 +32,6 @@ class UserStatsViewModel(
         }
     }
 
-
-    /*fun loadStatsByUserId(userId: Int) {
-        viewModelScope.launch {
-            userStatsDao.getStatsByUser(userId)
-                .distinctUntilChanged()
-                .collect { statsEntity ->
-                    _stats.value = statsEntity
-                }
-        }
-    }*/
-
     fun incrementRecyclings(userId: Int, increment: Int) {
         viewModelScope.launch {
             userStatsDao.incrementRecycling(userId, increment)

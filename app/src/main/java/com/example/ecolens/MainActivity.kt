@@ -9,6 +9,10 @@
 package com.example.ecolens
 
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -19,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -48,10 +53,30 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
+import com.example.ecolens.hardware.stepsensor.StepForegroundService
 import com.example.ecolens.hardware.vibration.*
+import com.example.ecolens.ui.viewmodels.AchievementsViewModel
+import com.example.ecolens.ui.viewmodels.AchievementsViewModelFactory
+import com.example.ecolens.ui.viewmodels.RecyclingViewModel
+import com.example.ecolens.ui.viewmodels.RecyclingViewModelFactory
+import com.example.ecolens.ui.viewmodels.StepsViewModel
+import com.example.ecolens.ui.viewmodels.StepsViewModelFactory
+import com.example.ecolens.ui.viewmodels.UserAchievementsViewModel
+import com.example.ecolens.ui.viewmodels.UserAchievementsViewModelFactory
 
 class MainActivity : ComponentActivity() {
     private lateinit var sessionViewModel: SessionViewModel
+
+    private fun startPedometerService() {
+        val intent = Intent(this, StepForegroundService::class.java)
+        ContextCompat.startForegroundService(this, intent)
+    }
+
+    private fun stopPedometerService() {
+        val intent = Intent(this, StepForegroundService::class.java)
+        stopService(intent)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,14 +97,21 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             EcoLensTheme {
-                MainScreen(sessionViewModel)
+                MainScreen(sessionViewModel,
+                        onStartPedometer = { startPedometerService() },
+                    onStopPedometer = { stopPedometerService() }
+                )
             }
         }
     }
 }
 
 @Composable
-fun MainScreen(sessionViewModel: SessionViewModel) {
+fun MainScreen(
+    sessionViewModel: SessionViewModel,
+    onStartPedometer: () -> Unit,
+    onStopPedometer: () -> Unit,
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -109,6 +141,10 @@ fun MainScreen(sessionViewModel: SessionViewModel) {
     val db = remember { DatabaseInstance.getDatabase(context) }
     val userDao = remember { db.userDao() }
     val userStatsDao = remember { db.userStatsDao() }
+    val recyclingDao = remember { db.recyclingDao() }
+    val stepsDao = remember { db.stepsDao() }
+    val achievementsDao = remember { db.archievementsDao() }
+    val userAchievementsDao = remember { db.userArchievementsDao() }
 
     val registerViewModel: RegisterViewModel = viewModel(
         factory = RegisterViewModelFactory(userDao)
@@ -119,6 +155,44 @@ fun MainScreen(sessionViewModel: SessionViewModel) {
     val userStatsViewModel: UserStatsViewModel = viewModel(
         factory = UserStatsViewModelFactory(userStatsDao)
     )
+    val recyclingViewModel: RecyclingViewModel = viewModel(
+        factory = RecyclingViewModelFactory(recyclingDao)
+    )
+    val stepsViewModel: StepsViewModel = viewModel(
+        factory = StepsViewModelFactory(stepsDao)
+    )
+    val achievementsViewModel: AchievementsViewModel = viewModel(
+        factory = AchievementsViewModelFactory(achievementsDao)
+    )
+    val userAchievementsViewModel: UserAchievementsViewModel = viewModel(
+        factory = UserAchievementsViewModelFactory(userAchievementsDao)
+    )
+    //pedometer:
+    //var stepCount by remember { mutableStateOf(0) }
+    val stepCountState = remember { mutableStateOf(0) }
+    // Escuchar broadcasts del servicio
+    DisposableEffect(Unit) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context?, intent: Intent?) {
+                if (intent?.action == "com.example.ecolens.STEP_UPDATE") {
+                    val steps = intent.getIntExtra("stepCount", 0)
+                    stepCountState.value = steps
+                }
+            }
+        }
+
+        val filter = IntentFilter("com.example.ecolens.STEP_UPDATE")
+        ContextCompat.registerReceiver(
+            context,
+            receiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+
+        onDispose {
+            context.unregisterReceiver(receiver)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -141,7 +215,13 @@ fun MainScreen(sessionViewModel: SessionViewModel) {
                 sessionViewModel,
                 registerViewModel,
                 userViewModel,
-                userStatsViewModel
+                userStatsViewModel,
+                recyclingViewModel,
+                onStartPedometer = onStartPedometer,
+                onStopPedometer = onStopPedometer,
+                stepCount = stepCountState.value,
+                onResetSteps = { stepCountState.value = 0 },
+                stepsViewModel
             )
         }
     }

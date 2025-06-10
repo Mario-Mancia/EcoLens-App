@@ -13,7 +13,7 @@ interface RecyclingDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun InsertRecycling(recycling: RecyclingEntity): Long
 
-    @Query("SELECT * FROM recycling WHERE userId = :userId ORDER BY datetime DESC")
+    @Query("SELECT * FROM recycling WHERE userId = :userId ORDER BY datetime DESC LIMIT 15")
     fun getRecyclingByUser(userId: Int): Flow<List<RecyclingEntity>>
 
     @Query("SELECT * FROM recycling WHERE id = :id")

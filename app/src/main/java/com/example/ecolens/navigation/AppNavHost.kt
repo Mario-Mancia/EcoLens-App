@@ -16,7 +16,9 @@ import com.example.ecolens.ui.screens.ScanScreen
 import com.example.ecolens.ui.screens.HistoryScreen
 import com.example.ecolens.ui.screens.ProfileScreen
 import com.example.ecolens.ui.screens.LaunchScreen
+import com.example.ecolens.ui.viewmodels.RecyclingViewModel
 import com.example.ecolens.ui.viewmodels.RegisterViewModel
+import com.example.ecolens.ui.viewmodels.StepsViewModel
 import com.example.ecolens.ui.viewmodels.UserStatsViewModel
 import com.example.ecolens.ui.viewmodels.UserViewModel
 
@@ -28,7 +30,13 @@ fun AppNavHost(
     sessionViewModel: SessionViewModel,
     registerViewModel: RegisterViewModel,
     userViewModel: UserViewModel,
-    userStatsViewModel: UserStatsViewModel
+    userStatsViewModel: UserStatsViewModel,
+    recyclingViewModel: RecyclingViewModel,
+    onStartPedometer: () -> Unit,
+    onStopPedometer: () -> Unit,
+    stepCount: Int,
+    onResetSteps: () -> Unit,
+    stepsViewModel: StepsViewModel
 ) {
     NavHost(
         navController = navController,
@@ -51,16 +59,31 @@ fun AppNavHost(
             HomeScreen(sessionViewModel, userViewModel, userStatsViewModel)
         }
         composable("pedometer") {
-            PedometerScreen(sessionViewModel, userViewModel)
+            PedometerScreen(
+                sessionViewModel,
+                userViewModel,
+                onStartPedometer = onStartPedometer,
+                onStopPedometer = onStopPedometer,
+                stepCount = stepCount,
+                stepsViewModel,
+                userStatsViewModel,
+                onResetSteps = onResetSteps
+            )
         }
         composable("camera") {
-            CamScreen(sessionViewModel, userViewModel)
+            CamScreen(
+                sessionViewModel,
+                userViewModel,
+                recyclingViewModel,
+                userStatsViewModel,
+                navController
+            )
         }
         composable("qrscanner") {
             ScanScreen(sessionViewModel, userViewModel)
         }
         composable("history") {
-            HistoryScreen(sessionViewModel, userViewModel)
+            HistoryScreen(sessionViewModel, userViewModel, recyclingViewModel)
         }
         composable("profile") {
             ProfileScreen(navController, sessionViewModel, userViewModel)
