@@ -58,6 +58,8 @@ import com.example.ecolens.hardware.stepsensor.StepForegroundService
 import com.example.ecolens.hardware.vibration.*
 import com.example.ecolens.ui.viewmodels.AchievementsViewModel
 import com.example.ecolens.ui.viewmodels.AchievementsViewModelFactory
+import com.example.ecolens.ui.viewmodels.QrScanViewModel
+import com.example.ecolens.ui.viewmodels.QrScanViewModelFactory
 import com.example.ecolens.ui.viewmodels.RecyclingViewModel
 import com.example.ecolens.ui.viewmodels.RecyclingViewModelFactory
 import com.example.ecolens.ui.viewmodels.StepsViewModel
@@ -145,6 +147,7 @@ fun MainScreen(
     val stepsDao = remember { db.stepsDao() }
     val achievementsDao = remember { db.archievementsDao() }
     val userAchievementsDao = remember { db.userArchievementsDao() }
+    val qrScanDao = remember { db.qrScanDao() }
 
     val registerViewModel: RegisterViewModel = viewModel(
         factory = RegisterViewModelFactory(userDao)
@@ -166,6 +169,9 @@ fun MainScreen(
     )
     val userAchievementsViewModel: UserAchievementsViewModel = viewModel(
         factory = UserAchievementsViewModelFactory(userAchievementsDao)
+    )
+    val qrScanViewModel: QrScanViewModel = viewModel(
+        factory = QrScanViewModelFactory(qrScanDao)
     )
     //pedometer:
     //var stepCount by remember { mutableStateOf(0) }
@@ -221,7 +227,8 @@ fun MainScreen(
                 onStopPedometer = onStopPedometer,
                 stepCount = stepCountState.value,
                 onResetSteps = { stepCountState.value = 0 },
-                stepsViewModel
+                stepsViewModel,
+                qrScanViewModel
             )
         }
     }

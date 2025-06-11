@@ -22,6 +22,9 @@ class StepsViewModel(private val stepsDao: StepsDao) : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val _todaySteps = MutableStateFlow<StepsEntity?>(null)
+    val todaySteps: StateFlow<StepsEntity?> = _todaySteps.asStateFlow()
+
     fun loadSteps(userId: Int) {
         viewModelScope.launch {
             try {
@@ -60,6 +63,16 @@ class StepsViewModel(private val stepsDao: StepsDao) : ViewModel() {
                 loadTotalSteps(userId)
             } catch (e: Exception) {
                 _error.value = "Error al guardar pasos: ${e.message}"
+            }
+        }
+    }
+
+    fun loadTodaySteps(userId: Int, date: LocalDate) {
+        viewModelScope.launch {
+            try {
+                _todaySteps.value = stepsDao.getStepsByDate(userId, date)
+            } catch (e: Exception) {
+                _error.value = "Error al obtener pasos de hoy: ${e.message}"
             }
         }
     }

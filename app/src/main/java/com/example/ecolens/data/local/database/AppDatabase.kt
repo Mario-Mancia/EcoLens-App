@@ -14,7 +14,8 @@ import com.example.ecolens.data.local.Converters
         UserStatsEntity::class,
         UserAchievementsEntity::class,
         AchievementsEntity::class,
-        StepsEntity::class
+        StepsEntity::class,
+        QrScanEntity::class
     ],
     version = 1,
     exportSchema = false
@@ -27,4 +28,5 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun userArchievementsDao(): UserArchievementsDao
     abstract fun archievementsDao(): ArchievementsDao
     abstract fun stepsDao(): StepsDao
+    abstract fun qrScanDao(): QrScanDao
 }

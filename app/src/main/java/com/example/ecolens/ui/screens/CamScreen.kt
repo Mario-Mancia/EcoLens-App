@@ -39,7 +39,7 @@ import com.example.ecolens.ui.viewmodels.UserViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-
+import com.example.ecolens.hardware.vibration.mediumVibrate
 
 @Composable
 fun CamScreen(
@@ -67,7 +67,7 @@ fun CamScreen(
 
     var productType by rememberSaveable { mutableStateOf<String?>(null) }
     var quantity by rememberSaveable { mutableStateOf(1) }
-    val productOptions = listOf("Plástico", "Papel", "Vidrio", "Metal", "Otro")
+    val productOptions = listOf("Orgánico", "Plástico", "Papel o Cartón", "Vidrio", "Metal", "Otro")
     var expanded by remember { mutableStateOf(false) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -165,7 +165,17 @@ fun CamScreen(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     fontSize = 20.sp
                 )
-                Button(onClick = { quantity++ }) { Text("+") }
+                Button(onClick = {
+                    if (quantity < 5) {
+                        quantity++
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Solo puedes añadir 5 productos a la vez",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }) { Text("+") }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -191,6 +201,7 @@ fun CamScreen(
                                 "Producto reciclado con éxito",
                                 Toast.LENGTH_SHORT
                             ).show()
+                            mediumVibrate(context)
 
                             // Actualizar stats
                             userStatsViewModel.incrementRecyclings(userId, quantity)

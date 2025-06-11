@@ -61,6 +61,15 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     kapt("androidx.room:room-compiler:2.7.1")
     implementation(libs.androidx.room.ktx)
+    //CameraX & ML Kit
+    implementation(libs.camerax.core)
+    implementation(libs.camerax.camera2)
+    implementation(libs.camerax.lifecycle)
+    implementation(libs.camerax.view)
+    implementation(libs.camerax.extensions)
+    implementation(libs.accompanist.permissions)
+
+    implementation(libs.mlkit.barcode)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

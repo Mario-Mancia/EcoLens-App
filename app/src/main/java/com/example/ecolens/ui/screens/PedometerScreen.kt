@@ -1,6 +1,7 @@
 package com.example.ecolens.ui.screens
 
 import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.app.ActivityManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.ecolens.data.local.session.SessionViewModel
@@ -52,6 +54,9 @@ fun PedometerScreen(
     var isPedometerOn by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        isPedometerOn = isStepServiceRunning(context)
+    }
     val permission = android.Manifest.permission.ACTIVITY_RECOGNITION
     val totalSteps: Int = stepCount
 
@@ -170,6 +175,19 @@ fun PedometerScreen(
             Text(text = "Registrar pasos")
         }
     }
+}
+
+//Esta función detecta si el servicio está activo para que el switch está apagado, se encienda automáticamente
+fun isStepServiceRunning(context: Context): Boolean {
+    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+    activityManager?.let {
+        for (service in it.getRunningServices(Int.MAX_VALUE)) {
+            if (service.service.className == "com.example.ecolens.hardware.stepsensor.StepForegroundService") {
+                return true
+            }
+        }
+    }
+    return false
 }
 
 @Preview(showBackground = true, showSystemUi = true)

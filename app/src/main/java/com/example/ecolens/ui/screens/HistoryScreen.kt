@@ -194,7 +194,7 @@ fun getColorForProductType(productType: String): Color {
         "plástico" -> Color(0xFFFFEB3B)
         "papel", "cartón" -> Color(0xFF38A2F6)
         "vidrio" -> Color(0xFF4CAF50)
-        "orgánicos" -> Color(0xFFF3744C)
+        "orgánico" -> Color(0xFFF3744C)
         "metales" -> Color(0xFF9E9E9E)
         else -> Color(0xFFBDBDBD)
     }

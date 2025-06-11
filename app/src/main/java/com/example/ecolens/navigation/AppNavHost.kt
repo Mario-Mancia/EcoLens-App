@@ -16,6 +16,7 @@ import com.example.ecolens.ui.screens.ScanScreen
 import com.example.ecolens.ui.screens.HistoryScreen
 import com.example.ecolens.ui.screens.ProfileScreen
 import com.example.ecolens.ui.screens.LaunchScreen
+import com.example.ecolens.ui.viewmodels.QrScanViewModel
 import com.example.ecolens.ui.viewmodels.RecyclingViewModel
 import com.example.ecolens.ui.viewmodels.RegisterViewModel
 import com.example.ecolens.ui.viewmodels.StepsViewModel
@@ -36,7 +37,8 @@ fun AppNavHost(
     onStopPedometer: () -> Unit,
     stepCount: Int,
     onResetSteps: () -> Unit,
-    stepsViewModel: StepsViewModel
+    stepsViewModel: StepsViewModel,
+    qrScanViewModel: QrScanViewModel
 ) {
     NavHost(
         navController = navController,
@@ -80,7 +82,7 @@ fun AppNavHost(
             )
         }
         composable("qrscanner") {
-            ScanScreen(sessionViewModel, userViewModel)
+            ScanScreen(sessionViewModel, userViewModel, qrScanViewModel, userStatsViewModel)
         }
         composable("history") {
             HistoryScreen(sessionViewModel, userViewModel, recyclingViewModel)
