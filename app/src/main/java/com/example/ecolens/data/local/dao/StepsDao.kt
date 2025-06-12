@@ -32,4 +32,8 @@ interface StepsDao {
 
     @Query("SELECT SUM(stepCount) FROM steps WHERE userId = :userId")
     suspend fun getTotalSteps(userId: Int): Int?
+
+    //Esta es la nueva función que añadí:
+    @Query("SELECT SUM(stepCount) FROM steps WHERE userId = :userId AND date = :date")
+    suspend fun getTodaySteps(userId: Int, date: LocalDate): Int
 }

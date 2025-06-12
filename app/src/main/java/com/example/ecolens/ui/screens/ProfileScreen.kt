@@ -61,7 +61,10 @@ import kotlinx.coroutines.launch
 
 //Función Composable para estructurar la pantalla de perfil de ususario
 @Composable
-fun ProfileScreen(navController: NavHostController, sessionViewModel: SessionViewModel, userViewModel: UserViewModel, modifier: Modifier = Modifier) {
+fun ProfileScreen(navController: NavHostController,
+                  sessionViewModel: SessionViewModel,
+                  userViewModel: UserViewModel,
+                  modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val sessionManager = remember { SessionManager(context) }
     val coroutineScope = rememberCoroutineScope()

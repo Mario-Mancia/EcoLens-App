@@ -16,10 +16,12 @@ import com.example.ecolens.ui.screens.ScanScreen
 import com.example.ecolens.ui.screens.HistoryScreen
 import com.example.ecolens.ui.screens.ProfileScreen
 import com.example.ecolens.ui.screens.LaunchScreen
+import com.example.ecolens.ui.viewmodels.AchievementsViewModel
 import com.example.ecolens.ui.viewmodels.QrScanViewModel
 import com.example.ecolens.ui.viewmodels.RecyclingViewModel
 import com.example.ecolens.ui.viewmodels.RegisterViewModel
 import com.example.ecolens.ui.viewmodels.StepsViewModel
+import com.example.ecolens.ui.viewmodels.UserAchievementsViewModel
 import com.example.ecolens.ui.viewmodels.UserStatsViewModel
 import com.example.ecolens.ui.viewmodels.UserViewModel
 
@@ -38,7 +40,9 @@ fun AppNavHost(
     stepCount: Int,
     onResetSteps: () -> Unit,
     stepsViewModel: StepsViewModel,
-    qrScanViewModel: QrScanViewModel
+    qrScanViewModel: QrScanViewModel,
+    achievementsViewModel: AchievementsViewModel,
+    userAchievementsViewModel: UserAchievementsViewModel
 ) {
     NavHost(
         navController = navController,
@@ -88,7 +92,15 @@ fun AppNavHost(
             HistoryScreen(sessionViewModel, userViewModel, recyclingViewModel)
         }
         composable("profile") {
-            ProfileScreen(navController, sessionViewModel, userViewModel)
+            ProfileScreen(
+                navController,
+                sessionViewModel,
+                userViewModel
+//                recyclingViewModel,
+//                userStatsViewModel,
+//                achievementsViewModel,
+//                userAchievementsViewModel
+                )
         }
         composable("launch") {
             LaunchScreen(navController)

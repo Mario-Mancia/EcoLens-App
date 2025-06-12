@@ -12,6 +12,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -57,7 +62,7 @@ val predefinedQrCodes = listOf(
     QrContent("QR_PLACE_04", "Lugar Sostenible", "Mercado de productos orgánicos", true),
     QrContent("QR_PLACE_05", "Lugar Sostenible", "Estación de carga solar", true)
 )
-
+/*
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ScanScreen(
@@ -247,5 +252,221 @@ fun QrScanCard(scan: QrScanEntity) {
             )
         }
     }
+}*/
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun ScanScreen(
+    sessionViewModel: SessionViewModel,
+    userViewModel: UserViewModel,
+    qrScanViewModel: QrScanViewModel,
+    userStatsViewModel: UserStatsViewModel,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+    var qrText by remember { mutableStateOf("") }
+    var matchedQr by remember { mutableStateOf<QrContent?>(null) }
+    val userEmail = sessionViewModel.userEmail.value
+
+    LaunchedEffect(userEmail) {
+        userEmail?.let { userViewModel.loadUserByEmail(it) }
+    }
+    val user by userViewModel.user
+
+    val cameraPermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
+
+    LaunchedEffect(Unit) {
+        cameraPermissionState.launchPermissionRequest()
+    }
+
+    LaunchedEffect(qrText) {
+        matchedQr = predefinedQrCodes.find { it.code == qrText }
+    }
+
+    val scans by qrScanViewModel.scans.collectAsState(emptyList())
+
+    LaunchedEffect(user) {
+        user?.id?.let { qrScanViewModel.loadScansByUser(it) }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Escanear productos o lugares", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        Text("Escanea códigos válidos y gana Puntos Eco", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(16.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.Black)
+        ) {
+            if (cameraPermissionState.status.isGranted) {
+                AndroidView(
+                    factory = { ctx ->
+                        val previewView = PreviewView(ctx)
+                        val preview = Preview.Builder().build().apply {
+                            setSurfaceProvider(previewView.surfaceProvider)
+                        }
+                        val analysis = ImageAnalysis.Builder()
+                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                            .build().apply {
+                                setAnalyzer(ContextCompat.getMainExecutor(ctx)) { image ->
+                                    QrCodeAnalyzer { scanned ->
+                                        qrText = scanned
+                                    }.analyze(image)
+                                }
+                            }
+                        val selector = CameraSelector.DEFAULT_BACK_CAMERA
+                        val provider = cameraProviderFuture.get()
+                        provider.unbindAll()
+                        provider.bindToLifecycle(lifecycleOwner, selector, preview, analysis)
+                        previewView
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Text("Permiso de cámara no concedido", color = Color.White, modifier = Modifier.align(Alignment.Center))
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        matchedQr?.let { qr ->
+            Card(
+                colors = CardDefaults.cardColors(containerColor = if (qr.isPlace) Color(0xFFB3E5FC) else Color(0xFFC8E6C9)),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(6.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if (qr.isPlace) Icons.Default.Place else Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = Color(0xFF026B60),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(qr.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(qr.description, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                val userId = user?.id ?: return@Button
+                matchedQr?.let { qr ->
+                    val scan = QrScanEntity(
+                        userId = userId,
+                        scanTitle = qr.title,
+                        content = qr.description,
+                        datetime = System.currentTimeMillis()
+                    )
+                    qrScanViewModel.insertScanIfNotExists(
+                        scan,
+                        onSuccess = {
+                            val points = if (qr.isPlace) 10 else 5
+                            userStatsViewModel.addEcoPoints(userId, points)
+                            Toast.makeText(context, "Código registrado con éxito", Toast.LENGTH_SHORT).show()
+                            qrText = ""
+                            matchedQr = null
+                        },
+                        onDuplicate = {
+                            Toast.makeText(context, "Este código ya fue escaneado", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            },
+            enabled = matchedQr != null,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+        ) {
+            Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Guardar")
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        Text("Escaneos anteriores", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(scans) { scan ->
+                QrScanCard(scan)
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+    }
 }
+
+@Composable
+fun QrScanCard(scan: QrScanEntity) {
+    val isPlace = predefinedQrCodes.find { it.title == scan.scanTitle }?.isPlace == true
+    val backgroundColor = if (isPlace) Color(0xFFB3E5FC) else Color(0xFFC8E6C9)
+    val icon = if (isPlace) Icons.Default.Place else Icons.Default.Eco
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color(0xFF026B60),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = scan.scanTitle,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+                Text(
+                    text = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(scan.datetime)),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Black
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = scan.content,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Black
+            )
+        }
+    }
+}
+
 

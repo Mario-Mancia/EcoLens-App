@@ -228,7 +228,9 @@ fun MainScreen(
                 stepCount = stepCountState.value,
                 onResetSteps = { stepCountState.value = 0 },
                 stepsViewModel,
-                qrScanViewModel
+                qrScanViewModel,
+                achievementsViewModel,
+                userAchievementsViewModel
             )
         }
     }

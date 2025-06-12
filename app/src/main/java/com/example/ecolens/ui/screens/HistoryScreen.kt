@@ -14,7 +14,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.LocalDrink
+import androidx.compose.material.icons.filled.Recycling
+import androidx.compose.material.icons.filled.WineBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -43,6 +49,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/*
 @Composable
 fun HistoryScreen(sessionViewModel: SessionViewModel,
                   userViewModel: UserViewModel,
@@ -198,7 +205,186 @@ fun getColorForProductType(productType: String): Color {
         "metales" -> Color(0xFF9E9E9E)
         else -> Color(0xFFBDBDBD)
     }
+}*/
+
+@Composable
+fun HistoryScreen(
+    sessionViewModel: SessionViewModel,
+    userViewModel: UserViewModel,
+    recyclingViewModel: RecyclingViewModel,
+    modifier: Modifier = Modifier
+) {
+    val userEmail = sessionViewModel.userEmail.value
+
+    LaunchedEffect(userEmail) {
+        userEmail?.let { userViewModel.loadUserByEmail(it) }
+    }
+    val user by userViewModel.user
+    val userId = user?.id ?: 0
+    val userName = user?.username ?: "desconocido"
+
+    LaunchedEffect(userId) {
+        if (userId != 0) {
+            recyclingViewModel.loadRecyclingHistory(userId)
+        }
+    }
+
+    val recyclingHistory by recyclingViewModel.recyclingHistory.collectAsState()
+
+    Scaffold { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Historial de Reciclajes",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp,
+                    color = Color(0xFF026B60)
+                ),
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+            Text(
+                text = "$userName, aquí puedes ver tus últimos 15 registros, " +
+                        "si quieres ver el total de tus contribuciones puedes hacerlo en tu inicio:",
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    color = Color.DarkGray
+                ),
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(recyclingHistory) { record ->
+                    RecyclingCard(record)
+                }
+            }
+        }
+    }
 }
+
+@Composable
+fun RecyclingCard(recycling: RecyclingEntity) {
+    val backgroundColor = getSoftColorForProductType(recycling.productType)
+    val icon = getIconForProductType(recycling.productType)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(36.dp),
+                tint = Color(0xFF026B60)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = recycling.productType,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(recycling.datetime)),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.DarkGray
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                DatoChip(
+                    icon = Icons.Default.Check,
+                    label = "Cantidad: ${recycling.quantity}",
+                    color = Color(0xFF026B60),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DatoChip(
+    icon: ImageVector,
+    label: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = color.copy(alpha = 0.15f),
+        modifier = modifier.height(48.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = color
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                fontSize = 14.sp,
+                maxLines = 1,
+                color = color
+            )
+        }
+    }
+}
+
+fun getSoftColorForProductType(productType: String): Color {
+    return when (productType.lowercase()) {
+        "plástico" -> Color(0xFFFFF59D) // Amarillo suave
+        "papel o cartón" -> Color(0xFFBBDEFB) // Azul suave
+        "vidrio" -> Color(0xFFC8E6C9) // Verde suave
+        "orgánico" -> Color(0xFFFFCCBC) // Naranja claro
+        "metal", "metales" -> Color(0xFFE0E0E0) // Gris claro
+        else -> Color(0xFFEEEEEE) // Neutro
+    }
+}
+
+fun getIconForProductType(productType: String): ImageVector {
+    return when (productType.lowercase()) {
+        "plástico" -> Icons.Default.LocalDrink
+        "papel", "cartón" -> Icons.Default.Description
+        "vidrio" -> Icons.Default.WineBar
+        "orgánico" -> Icons.Default.Eco
+        "metal", "metales" -> Icons.Default.Build
+        else -> Icons.Default.Recycling
+    }
+}
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
