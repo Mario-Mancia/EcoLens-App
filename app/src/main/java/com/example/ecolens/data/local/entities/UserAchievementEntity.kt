@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "user_achievements",
+    primaryKeys = ["userId", "achievementId"],
     foreignKeys = [
         ForeignKey(
             entity = UserEntity::class,
@@ -22,7 +23,6 @@ import androidx.room.PrimaryKey
     ]
 )
 data class UserAchievementsEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val userId: Int,
     val achievementId: Int,
     val unlockedAt: String

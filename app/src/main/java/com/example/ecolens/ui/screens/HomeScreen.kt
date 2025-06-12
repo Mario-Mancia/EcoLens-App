@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
@@ -30,6 +32,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ecolens.data.local.session.SessionViewModel
+import com.example.ecolens.ui.viewmodels.UserAchievementsViewModel
 import com.example.ecolens.ui.viewmodels.UserStatsViewModel
 import com.example.ecolens.ui.viewmodels.UserViewModel
 
@@ -50,6 +56,7 @@ fun HomeScreen(
     sessionViewModel: SessionViewModel,
     userViewModel: UserViewModel,
     userStatsViewModel: UserStatsViewModel,
+    userAchievementsViewModel: UserAchievementsViewModel,
     modifier: Modifier = Modifier
 ) {
     val userEmail = sessionViewModel.userEmail.value
@@ -62,9 +69,12 @@ fun HomeScreen(
     val userId = user?.id ?: 0
     val userName = user?.username ?: "desconocido"
 
+
+    val totalAchievements by userAchievementsViewModel.achievementCount.collectAsState()
     LaunchedEffect(userId) {
         if (userId != 0) {
             userStatsViewModel.loadStatsByUserId(userId)
+            userAchievementsViewModel.countUserAchievements(userId)
         }
     }
 
@@ -94,7 +104,51 @@ fun HomeScreen(
             ),
             modifier = Modifier.padding(bottom = 24.dp)
         )
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            shape = RectangleShape,
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF098E0F)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(72.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .background(Color.White, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = null,
+                            tint = Color(0xFF026B60),
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
 
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Text(
+                    text = "Recuerda revisar tu perfil para verificar si conseguiste nuevos logros",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Justify,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
         if (stats != null) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -108,7 +162,7 @@ fun HomeScreen(
                 )
                 StatsCard(
                     title = "Logros",
-                    description = "Has desbloqueado un total de ${stats!!.totalAchievements} logros.",
+                    description = "Has desbloqueado un total de $totalAchievements logros.",
                     icon = Icons.Default.EmojiEvents,
                     backgroundColor = Color(0xFF05A597)
                 )

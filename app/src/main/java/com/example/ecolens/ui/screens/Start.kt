@@ -76,14 +76,7 @@ fun StartScreen(navController: NavHostController, modifier: Modifier = Modifier)
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(onClick = { /* Opciones */ }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Más opciones",
-                        tint = Color.White,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
+
             }
 
             // Logo y título

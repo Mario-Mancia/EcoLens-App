@@ -282,55 +282,6 @@ fun PedometerScreen(
                 )
             }
         }
-        /*
-        Text(
-            text = "Pasos actuales: $totalSteps",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(onClick = {
-            if (userId != 0) {
-                val ecoPoints = totalSteps / 100
-                stepsViewModel.insertOrUpdateSteps(userId, totalSteps, today)
-                userStatsViewModel.addSteps(userId, totalSteps)
-
-                if (ecoPoints > 0) {
-                    userStatsViewModel.addEcoPoints(userId, ecoPoints)
-                }
-
-                mediumVibrate(context)
-
-                Toast.makeText(
-                    context,
-                    "Pasos registrados exitosamente" + if (ecoPoints > 0) " (+$ecoPoints EcoPuntos)" else "",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                onResetSteps()
-                stepsViewModel.loadTodaySteps(userId, today) // refrescar después de registrar
-            } else {
-                Toast.makeText(
-                    context,
-                    "Error: usuario no identificado",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        },
-            enabled = totalSteps > 0 && !isPedometerOn
-        ) {
-            Text(text = "Registrar pasos")
-        }*/
-        /*
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Pasos registrados hoy: ${todaySteps?: 0}",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.secondary
-        )*/
     }
 }
 

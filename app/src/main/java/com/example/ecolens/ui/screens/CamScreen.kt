@@ -1,8 +1,10 @@
 package com.example.ecolens.ui.screens
 
+import android.Manifest
 import androidx.compose.ui.tooling.preview.Preview
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
@@ -35,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -288,6 +291,8 @@ fun CamScreen(
         }
     }
 
+
+
     fun launchCameraIntent() {
         val photoFile = createImageFile(context)
         val uri = FileProvider.getUriForFile(
@@ -300,6 +305,16 @@ fun CamScreen(
         productType = null
         quantity = 1
         cameraLauncher.launch(uri)
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            launchCameraIntent()
+        } else {
+            Toast.makeText(context, "Se requiere permiso de cámara", Toast.LENGTH_SHORT).show()
+        }
     }
 
     Column(
@@ -318,7 +333,15 @@ fun CamScreen(
 
         if (imageUri == null || !showForm) {
             Button(
-                onClick = { launchCameraIntent() },
+                onClick = {
+                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                        == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        launchCameraIntent()
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
@@ -383,7 +406,13 @@ fun CamScreen(
                 Button(
                     onClick = { if (quantity > 1) quantity-- },
                     modifier = Modifier.size(48.dp),
-                    contentPadding = PaddingValues(0.dp)
+                    contentPadding = PaddingValues(0.dp),
+                    colors = ButtonColors(
+                        containerColor = Color(0xFF098E0F),
+                        contentColor = Color.White,
+                        disabledContentColor = Color.Gray,
+                        disabledContainerColor = Color.DarkGray
+                    )
                 ) {
                     Icon(Icons.Default.Remove, contentDescription = "Disminuir")
                 }
@@ -402,7 +431,14 @@ fun CamScreen(
                         ).show()
                     },
                     modifier = Modifier.size(48.dp),
-                    contentPadding = PaddingValues(0.dp)
+                    contentPadding = PaddingValues(0.dp),
+                    colors = ButtonColors(
+                        containerColor = Color(0xFF098E0F),
+                        contentColor = Color.White,
+                        disabledContentColor = Color.Gray,
+                        disabledContainerColor = Color.DarkGray
+                    )
+
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Aumentar")
                 }
@@ -467,7 +503,7 @@ fun CamScreen(
                         quantity = 1
                     },
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF56D82))
                 ) {
                     Icon(Icons.Default.Close, contentDescription = null, tint = Color.White)
                     Spacer(modifier = Modifier.width(8.dp))

@@ -49,6 +49,12 @@ class UserStatsViewModel(
             userStatsDao.addSteps(userId, steps)
         }
     }
+
+    fun incrementAchievements(userId: Int, increment: Int) {
+        viewModelScope.launch {
+            userStatsDao.incrementAchievements(userId, increment)
+        }
+    }
 }
 
 class UserStatsViewModelFactory(

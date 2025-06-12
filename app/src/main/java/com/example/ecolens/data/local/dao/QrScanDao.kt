@@ -17,4 +17,7 @@ interface QrScanDao {
 
     @Query("SELECT COUNT(*) FROM qr_scans WHERE userId = :userId AND content = :content")
     suspend fun isScanRegistered(userId: Int, content: String): Int
+
+    @Query("SELECT COUNT(DISTINCT content) FROM qr_scans WHERE userId = :userId")
+    suspend fun getUniqueScanCount(userId: Int): Int
 }

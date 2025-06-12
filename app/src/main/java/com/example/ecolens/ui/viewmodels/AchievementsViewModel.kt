@@ -8,6 +8,7 @@ import com.example.ecolens.data.local.dao.ArchievementsDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 class AchievementsViewModel(private val achievementsDao: ArchievementsDao) : ViewModel() {
@@ -36,6 +37,28 @@ class AchievementsViewModel(private val achievementsDao: ArchievementsDao) : Vie
             }
         }
     }
+
+    fun ensureDefaultAchievementsExist() {
+        viewModelScope.launch {
+            val existing = achievementsDao.getAllAchievements().firstOrNull()
+            if (existing.isNullOrEmpty()) {
+                val defaultAchievements = listOf(
+                    AchievementsEntity(name = "Reciclador principiante", description = "Clasifica tu primer residuo con EcoLens.", type = "reciclaje"),
+                    AchievementsEntity(name = "Maestro del plástico", description = "Has clasificado un total de 50 ítems de plástico.", type = "reciclaje"),
+                    AchievementsEntity(name = "Héroe del vidrio", description = "Tu compromiso con el vidrio es cristalino.", type = "reciclaje"),
+                    AchievementsEntity(name = "Caminante urbano", description = "Has dado tus primeros 1,000 pasos Eco.", type = "pasos"),
+                    AchievementsEntity(name = "Activista del reciclaje", description = "Alcanza los 500 Puntos Eco.", type = "reciclaje"),
+                    AchievementsEntity(name = "Explorador sostenible", description = "Has escaneado tu primer código QR de producto/punto sostenible.", type = "qr"),
+                    AchievementsEntity(name = "Consumidor consciente", description = "Has escaneado 5 códigos QR de productos sostenibles diferentes.", type = "qr"),
+                    AchievementsEntity(name = "Pionero EcoLens", description = "Uno de los primeros 10 usuarios en unirse a la comunidad EcoLens.", type = "otros"),
+                    AchievementsEntity(name = "EcoUsuario activo", description = "Abre la app durante 3 días consecutivos.", type = "otros"),
+                    AchievementsEntity(name = "Primer paso Eco", description = "Registra tu primer paso con el sensor.", type = "pasos")
+                )
+                achievementsDao.insertAllAchievements(defaultAchievements)
+            }
+        }
+    }
+
 }
 
 class AchievementsViewModelFactory(

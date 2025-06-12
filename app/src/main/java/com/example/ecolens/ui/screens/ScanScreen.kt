@@ -297,7 +297,13 @@ fun ScanScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Escanear productos o lugares", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(
+            "Escanear productos o lugares",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF026B60)
+            ),
+        )
         Spacer(Modifier.height(8.dp))
         Text("Escanea códigos válidos y gana Puntos Eco", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp))

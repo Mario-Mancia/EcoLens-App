@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserArchievementsDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertUserAchievement(userAchievement: UserAchievementsEntity): Long
 
     @Delete
@@ -22,4 +22,7 @@ interface UserArchievementsDao {
 
     @Query("SELECT * FROM user_achievements WHERE userId = :userId AND achievementId = :achievementId LIMIT 1")
     suspend fun getUserAchievement(userId: Int, achievementId: Int): UserAchievementsEntity?
+
+    @Query("SELECT COUNT(*) FROM user_achievements WHERE userId = :userId")
+    suspend fun countAchievementsByUser(userId: Int): Int
 }

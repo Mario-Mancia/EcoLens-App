@@ -17,6 +17,9 @@ class QrScanViewModel(
     private val _scans = MutableStateFlow<List<QrScanEntity>>(emptyList())
     val scans: StateFlow<List<QrScanEntity>> = _scans.asStateFlow()
 
+    private val _uniqueScanCount = MutableStateFlow(0)
+    val uniqueScanCount: StateFlow<Int> = _uniqueScanCount.asStateFlow()
+
     fun insertScanIfNotExists(scan: QrScanEntity, onSuccess: () -> Unit, onDuplicate: () -> Unit) {
         viewModelScope.launch {
             val exists = qrScanDao.isScanRegistered(scan.userId, scan.content) > 0
@@ -35,6 +38,13 @@ class QrScanViewModel(
             qrScanDao.getScansByUser(userId).collect { userScans ->
                 _scans.value = userScans
             }
+        }
+    }
+
+    fun loadUniqueScanCount(userId: Int) {
+        viewModelScope.launch {
+            val count = qrScanDao.getUniqueScanCount(userId)
+            _uniqueScanCount.value = count
         }
     }
 }

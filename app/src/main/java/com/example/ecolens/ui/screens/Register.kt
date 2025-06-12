@@ -65,6 +65,7 @@ import androidx.navigation.NavHostController
 import com.example.ecolens.R
 import com.example.ecolens.ui.viewmodels.RegisterViewModel
 import com.example.ecolens.hardware.vibration.*
+import com.example.ecolens.ui.viewmodels.AchievementsViewModel
 
 /**
  * Función composable para construir la pantalla de registro de nuevos usuarios.
@@ -72,6 +73,7 @@ import com.example.ecolens.hardware.vibration.*
 @Composable
 fun RegisterScreen(navController: NavHostController,
                    registerViewModel: RegisterViewModel,
+                   achievementsViewModel: AchievementsViewModel,
                    modifier: Modifier = Modifier
 ) {
     var username by remember { mutableStateOf("") }
@@ -98,6 +100,10 @@ fun RegisterScreen(navController: NavHostController,
         if (registerSuccess == true) {
             Toast.makeText(context, "Registro exitoso", Toast.LENGTH_SHORT).show()
             mediumVibrate(context)
+
+            navController.navigate("Login")
+
+            achievementsViewModel.ensureDefaultAchievementsExist()
         }
 
     }
@@ -134,20 +140,12 @@ fun RegisterScreen(navController: NavHostController,
                     .fillMaxWidth()
                     .padding(top = 32.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.Start
             ) {
                 IconButton(onClick = { navController.navigate("Start") }) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Volver",
-                        tint = Color.White,
-                        modifier = Modifier.size(38.dp)
-                    )
-                }
-                IconButton(onClick = { /* Más opciones */ }) {
-                    Icon(
-                        Icons.Default.MoreVert,
-                        contentDescription = "Opciones",
                         tint = Color.White,
                         modifier = Modifier.size(38.dp)
                     )

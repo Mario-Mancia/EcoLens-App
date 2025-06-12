@@ -53,16 +53,20 @@ fun AppNavHost(
             StartScreen(navController)
         }
         composable("Login") {
-            LoginScreen(navController, sessionViewModel)
+            LoginScreen(navController, sessionViewModel, achievementsViewModel)
         }
         composable("Register") {
-            RegisterScreen(navController, registerViewModel)
+            RegisterScreen(navController, registerViewModel, achievementsViewModel)
         }
 
         //Pantallas privadas
 
         composable("home") {
-            HomeScreen(sessionViewModel, userViewModel, userStatsViewModel)
+            HomeScreen(sessionViewModel,
+                userViewModel,
+                userStatsViewModel,
+                userAchievementsViewModel
+            )
         }
         composable("pedometer") {
             PedometerScreen(
@@ -95,11 +99,12 @@ fun AppNavHost(
             ProfileScreen(
                 navController,
                 sessionViewModel,
-                userViewModel
-//                recyclingViewModel,
-//                userStatsViewModel,
-//                achievementsViewModel,
-//                userAchievementsViewModel
+                userViewModel,
+                recyclingViewModel,
+                userStatsViewModel,
+                achievementsViewModel,
+                userAchievementsViewModel,
+                qrScanViewModel
                 )
         }
         composable("launch") {

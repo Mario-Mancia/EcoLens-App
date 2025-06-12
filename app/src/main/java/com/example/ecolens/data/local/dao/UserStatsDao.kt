@@ -28,4 +28,7 @@ interface UserStatsDao {
 
     @Query("UPDATE user_stats SET totalSteps = totalSteps + :steps WHERE userId = :userId")
     suspend fun addSteps(userId: Int, steps: Int)
+
+    @Query("UPDATE user_stats SET totalAchievements = totalAchievements + :increment WHERE userId = :userId")
+    suspend fun incrementAchievements(userId: Int, increment: Int)
 }

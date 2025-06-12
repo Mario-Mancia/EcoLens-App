@@ -63,12 +63,13 @@ import com.example.ecolens.data.local.session.SessionViewModel
 import com.example.ecolens.ui.viewmodels.LoginViewModel
 import com.example.ecolens.ui.viewmodels.LoginViewModelFactory
 import com.example.ecolens.hardware.vibration.*
+import com.example.ecolens.ui.viewmodels.AchievementsViewModel
 
 /**
  * Función composable para construir la pantalla de Login
  */
 @Composable
-fun LoginScreen (navController: NavHostController, sessionViewModel: SessionViewModel, modifier: Modifier = Modifier) {
+fun LoginScreen (navController: NavHostController, sessionViewModel: SessionViewModel, achievementsViewModel: AchievementsViewModel, modifier: Modifier = Modifier) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -80,6 +81,7 @@ fun LoginScreen (navController: NavHostController, sessionViewModel: SessionView
     LaunchedEffect(loginSuccess) {
         if (loginSuccess == true) {
             sessionViewModel.refreshSession()
+            achievementsViewModel.ensureDefaultAchievementsExist()
             navController.navigate("home")
             loginViewModel.resetLoginState()
         } else if (loginSuccess == false) {
@@ -103,7 +105,7 @@ fun LoginScreen (navController: NavHostController, sessionViewModel: SessionView
             Row(
                 modifier.fillMaxWidth().height(96.dp),
                 verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.Start
             ) {
                 IconButton(
                     onClick = {
@@ -112,19 +114,6 @@ fun LoginScreen (navController: NavHostController, sessionViewModel: SessionView
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Icono de retroceso",
-                        tint = Color.White,
-                        modifier = Modifier.size(38.dp)
-                    )
-                }
-
-                IconButton(
-                    onClick = {
-
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
                         contentDescription = "Icono de retroceso",
                         tint = Color.White,
                         modifier = Modifier.size(38.dp)
@@ -197,6 +186,8 @@ fun LoginScreen (navController: NavHostController, sessionViewModel: SessionView
                         }
                         username = ""
                         password = ""
+
+                        shortVibrate(context)
                     },
                     enabled = username.isNotBlank() && password.isNotBlank(),
                     modifier = Modifier

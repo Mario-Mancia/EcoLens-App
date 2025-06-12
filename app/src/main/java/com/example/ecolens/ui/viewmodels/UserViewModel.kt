@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ecolens.data.local.dao.UserDao
 import com.example.ecolens.data.local.entities.UserEntity
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class UserViewModel(private val userDao: UserDao) : ViewModel() {
 
@@ -18,6 +19,25 @@ class UserViewModel(private val userDao: UserDao) : ViewModel() {
         viewModelScope.launch {
             val userEntity = userDao.getUserByEmail(email)
             _user.value = userEntity
+        }
+    }
+    fun updateUsername(userId: Int, newUsername: String) {
+        viewModelScope.launch {
+            userDao.updateUsername(userId, newUsername)
+            _user.value = userDao.getUserById(userId) // refresca
+        }
+    }
+
+    fun updatePassword(userId: Int, currentPassword: String, newPassword: String): Boolean {
+        return runBlocking {
+            val user = userDao.getUserById(userId)
+            if (user != null && user.password == currentPassword) {
+                userDao.updatePassword(userId, newPassword)
+                _user.value = userDao.getUserById(userId)
+                true
+            } else {
+                false
+            }
         }
     }
 }
