@@ -1,4 +1,7 @@
 # EcoLens-App
+
+## Project is in Master branch
+
 Short description: A university project to build a mobile app that helps users be more environmentally friendly.
 
 ENG: Hello everyone! This is my first mobile app project. This is an academic project for my 'Mobile App Development 1' class, developed with Kotlin + Jetpack Compose based on Material Design 3. It's an app that allows the user to perform a series of eco-friendly actions, such as recycling products, scanning eco-friendly products and locations, and also has a built-in step counter to encourage healthy living and reduce the use of polluting modes of transportation. It's a simple project but has a very good foundation for growth.
